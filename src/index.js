@@ -1,3 +1,4 @@
+import debounce from 'lodash.debounce';
 import './css/styles.css';
 
 const DEBOUNCE_DELAY = 300;
@@ -7,10 +8,11 @@ const refs = {
     countryList: document.querySelector('.country-list'),
     countryInfo: document.querySelector('.country-info'),
 }
-refs.input.addEventListener('input', onRenderCountry);
+refs.input.addEventListener('input', debounce(onRenderCountry, DEBOUNCE_DELAY));
 
 function onRenderCountry (event) {
-    const inputValue = event.currentTarget.value;
+  
+    const inputValue = (event.target.value).trim();
 
     if (inputValue.length > 0) {
         fetchCountries(inputValue);
