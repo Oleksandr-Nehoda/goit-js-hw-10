@@ -20,46 +20,68 @@ function onRenderCountry (event) {
     if (inputValue.length > 0) {
        return API.fetchCountries(inputValue).then(renderCountry)
        .catch(() => {
-        Notiflix.Notify.failure("Oops, there is no country with that name");
-        refs.countryInfo.innerHTML= '';
-        refs.countryList.innerHTML= '';
+        notificationFeil()
+        deleteCountryInfo();
+        deleteCountryList()
     });
     }
 }
 
 function renderCountry (array) {
     if (array.length > 10){
-        Notiflix.Notify.info("Too many matches found. Please enter a more specific name.")
-        refs.countryInfo.innerHTML= '';
-        refs.countryList.innerHTML= '';
+        notificationInfo();
+        deleteCountryInfo();
+        deleteCountryList();
     } else if(array.length > 1){
-        refs.countryInfo.innerHTML= '';
-        refs.countryList.innerHTML= '';
-    array.map((object) => {
-        const name = object.name.official;
-        const flag = object.flags.svg;
-        const markup = ` <li class="country-item">
-        <img class="country-flag" src="${flag}" alt="Flag country ${name}" width = 70 height = 50>
-        <p class="country-name">${name}</p>
-      </li>`;
-      refs.countryList.insertAdjacentHTML('beforeend', markup);
+        deleteCountryInfo();
+        deleteCountryList();
+    array.map(({name, flags}) => {
+        const nameCountry = name.official;
+        const flag = flags.svg;
+      refs.countryList.insertAdjacentHTML('beforeend', makeMarkupCountryList(nameCountry, flag));
     })
     } else if(array.length === 1){
-        refs.countryList.innerHTML= '';
+        deleteCountryList();
         const object = array[0];
-        const name = object.name.official;
-        const capital = object.capital[0];
-        const population = object.population;
-        const flag = object.flags.svg;
-        const languages = (Object.values(object.languages)).join(', ');
-        const markup = `<img src="${flag}" alt="Flag country ${name}" width = 70 height = 50>
-        <h1 class="country-title">${name}</h1>
-        <p class="text-info"><span class="text-info--blod">Capital: </span>${capital}</p>
-        <p class="text-info"><span class="text-info--blod">Population: </span>${population}</p>
-        <p class="text-info"><span class="text-info--blod">Languages: </span>${languages}</p>`;
-        refs.countryInfo.innerHTML =  markup;
+        const {name, capital, population, flags, languages} = object;
+        const nameCountry = name.official;
+        const capitalCountry = capital[0];
+        const populationCountry = population;
+        const flag = flags.svg;
+        const language = (Object.values(languages)).join(', ');
+        refs.countryInfo.innerHTML =  makeMarkupCountryInfo(nameCountry, flag, capitalCountry, populationCountry, language);
     } 
     
 }
 
-function 
+function notificationInfo () {
+    return Notiflix.Notify.info("Too many matches found. Please enter a more specific name.");
+    }
+
+function notificationFeil () {
+    return Notiflix.Notify.failure("Oops, there is no country with that name");
+    }
+
+function deleteCountryList () {
+  return refs.countryList.innerHTML= '';
+}
+
+function deleteCountryInfo () {
+   return refs.countryInfo.innerHTML= '';
+}
+
+function makeMarkupCountryList (nameCountry, flag) {
+    return `<li class="country-item">
+    <img class="country-flag" src="${flag}" alt="Flag country ${nameCountry}" width = 70 height = 50>
+    <p class="country-name">${nameCountry}</p>
+  </li>`; 
+}
+
+function makeMarkupCountryInfo (nameCountry, flag, capitalCountry, populationCountry, language) {
+   
+    return `<img src="${flag}" alt="Flag country ${nameCountry}" width = 70 height = 50>
+    <h1 class="country-title">${nameCountry}</h1>
+    <p class="text-info"><span class="text-info--blod">Capital: </span>${capitalCountry}</p>
+    <p class="text-info"><span class="text-info--blod">Population: </span>${populationCountry}</p>
+    <p class="text-info"><span class="text-info--blod">Languages: </span>${language}</p>`; 
+}
