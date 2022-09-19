@@ -1,5 +1,7 @@
 import debounce from 'lodash.debounce';
+import Notiflix from 'notiflix';
 import './css/styles.css';
+import API from './fetchCountries';
 
 const DEBOUNCE_DELAY = 300;
 
@@ -8,6 +10,7 @@ const refs = {
     countryList: document.querySelector('.country-list'),
     countryInfo: document.querySelector('.country-info'),
 }
+
 refs.input.addEventListener('input', debounce(onRenderCountry, DEBOUNCE_DELAY));
 
 function onRenderCountry (event) {
@@ -15,28 +18,23 @@ function onRenderCountry (event) {
     const inputValue = (event.target.value).trim();
 
     if (inputValue.length > 0) {
-        fetchCountries(inputValue);
+       return API.fetchCountries(inputValue).then(renderCountry)
+       .catch(() => {
+        Notiflix.Notify.failure("Oops, there is no country with that name");
+        refs.countryInfo.innerHTML= '';
+        refs.countryList.innerHTML= '';
+    });
     }
 }
 
-
-
-function fetchCountries(name) {
-    fetch(`https://restcountries.com/v3.1/name/${name}?fields=name,capital,population,flags,languages`)
-    .then(respons => {
-       return respons.json();
-    }).then(renderCountry);
-}
-
-
-
 function renderCountry (array) {
     if (array.length > 10){
-        console.log(`"Too many matches found. Please enter a more specific name."`)
+        Notiflix.Notify.info("Too many matches found. Please enter a more specific name.")
         refs.countryInfo.innerHTML= '';
         refs.countryList.innerHTML= '';
     } else if(array.length > 1){
         refs.countryInfo.innerHTML= '';
+        refs.countryList.innerHTML= '';
     array.map((object) => {
         const name = object.name.official;
         const flag = object.flags.svg;
@@ -59,12 +57,9 @@ function renderCountry (array) {
         <p class="text-info"><span class="text-info--blod">Capital: </span>${capital}</p>
         <p class="text-info"><span class="text-info--blod">Population: </span>${population}</p>
         <p class="text-info"><span class="text-info--blod">Languages: </span>${languages}</p>`;
-        refs.countryInfo.insertAdjacentHTML('beforeend', markup);
-    }  else {
-        refs.countryInfo.innerHTML= '';
-        refs.countryList.innerHTML= '';
-        console.log(`"Oops, there is no country with that name"`);
-    }
+        refs.countryInfo.innerHTML =  markup;
+    } 
     
 }
 
+function 
